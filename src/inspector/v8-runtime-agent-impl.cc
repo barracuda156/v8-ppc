@@ -30,7 +30,7 @@
 
 #include "src/inspector/v8-runtime-agent-impl.h"
 
-#include <inttypes.h>
+#include <cinttypes>
 
 #include "../../third_party/inspector_protocol/crdtp/json.h"
 #include "src/debug/debug-interface.h"
