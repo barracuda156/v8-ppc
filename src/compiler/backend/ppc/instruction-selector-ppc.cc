@@ -353,10 +353,12 @@ void InstructionSelector::VisitStore(Node* node) {
         mode = kInt16Imm_4ByteAligned;
         opcode = kPPC_StoreCompressTagged;
         break;
+#if V8_TARGET_ARCH_PPC64
       case MachineRepresentation::kWord64:
         opcode = kPPC_StoreWord64;
         mode = kInt16Imm_4ByteAligned;
         break;
+#endif
       case MachineRepresentation::kSimd128:
         opcode = kPPC_StoreSimd128;
         // Vectors do not support MRI mode, only MRR is available.
