@@ -5,7 +5,12 @@
 #include "src/base/platform/semaphore.h"
 
 #if V8_OS_MACOSX
+#include <AvailabilityMacros.h>
+#if MAC_OS_X_VERSION_MIN_REQUIRED > 1050 && !defined(__ppc__)
 #include <dispatch/dispatch.h>
+#else
+#include <semaphore.h>
+#endif
 #elif V8_OS_WIN
 #include <windows.h>
 #endif
@@ -19,7 +24,7 @@
 namespace v8 {
 namespace base {
 
-#if V8_OS_MACOSX
+#if V8_OS_MACOSX && (MAC_OS_X_VERSION_MIN_REQUIRED > 1050 && !defined(__ppc__))
 
 Semaphore::Semaphore(int count) {
   native_handle_ = dispatch_semaphore_create(count);
