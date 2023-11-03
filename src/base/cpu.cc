@@ -699,13 +699,13 @@ struct host_basic_info host_basic_info;
   switch(host_basic_info.cpu_subtype) {
     case CPU_SUBTYPE_POWERPC_970:
     default:
-      part_ = kPPCG5;
+      part_ = PPC_G5;
       break;
     case CPU_SUBTYPE_POWERPC_7450:
-      part_ = kPPCG4;
+      part_ = PPC_G4;
       break;
     case CPU_SUBTYPE_POWERPC_7400:
-      part_ = kPPCG4;
+      part_ = PPC_G4;
       break;
    }
 
