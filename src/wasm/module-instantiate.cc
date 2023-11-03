@@ -4,6 +4,8 @@
 
 #include "src/wasm/module-instantiate.h"
 
+#include <cinttypes>
+
 #include "src/asmjs/asm-js.h"
 #include "src/logging/counters.h"
 #include "src/numbers/conversions-inl.h"

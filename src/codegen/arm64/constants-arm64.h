@@ -23,7 +23,7 @@ STATIC_ASSERT(sizeof(1) == sizeof(int32_t));
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
-#include <inttypes.h>
+#include <cinttypes>
 
 namespace v8 {
 namespace internal {

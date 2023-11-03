@@ -89,7 +89,7 @@ const uint32_t kLessSignificantWordInDoublewordOffset = 4;
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
-#include <inttypes.h>
+#include <cinttypes>
 
 // Defines constants and accessor classes to assemble, disassemble and
 // simulate MIPS32 instructions.
