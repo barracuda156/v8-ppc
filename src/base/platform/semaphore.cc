@@ -90,7 +90,11 @@ bool Semaphore::WaitFor(const TimeDelta& rel_time) {
 
   // Wait for semaphore signalled or timeout.
   while (true) {
+#if V8_OS_MACOSX
+    int result = sem_wait(&native_handle_); // This is a dirty hack to make it compile; it is not expected to work.
+#else
     int result = sem_timedwait(&native_handle_, &ts);
+#endif
     if (result == 0) return true;  // Semaphore was signalled.
 #if V8_LIBC_GLIBC && !V8_GLIBC_PREREQ(2, 4)
     if (result > 0) {
