@@ -2213,7 +2213,7 @@ CodeGenerator::CodeGenResult CodeGenerator::AssembleArchInstruction(
       __ orx(output, temp2, temp3);
       break;
     }
-#endif  // V8_TARGET_ARCH_PPC64
+
     case kPPC_F64x2Splat: {
       Simd128Register dst = i.OutputSimd128Register();
       constexpr int shift_bits = 64;
@@ -2229,6 +2229,7 @@ CodeGenerator::CodeGenResult CodeGenerator::AssembleArchInstruction(
       __ vor(dst, dst, kScratchDoubleReg);
       break;
     }
+#endif  // V8_TARGET_ARCH_PPC64
     case kPPC_F32x4Splat: {
       Simd128Register dst = i.OutputSimd128Register();
       __ MovFloatToInt(kScratchReg, i.InputDoubleRegister(0));
@@ -2269,11 +2270,13 @@ CodeGenerator::CodeGenResult CodeGenerator::AssembleArchInstruction(
       __ vspltb(dst, dst, Operand(7));
       break;
     }
+#ifdef V8_TARGET_ARCH_PPC64
     case kPPC_F64x2ExtractLane: {
       __ mfvsrd(kScratchReg, i.InputSimd128Register(0));
       __ MovInt64ToDouble(i.OutputDoubleRegister(), kScratchReg);
       break;
     }
+#endif
     case kPPC_F32x4ExtractLane: {
       __ mfvsrwz(kScratchReg, i.InputSimd128Register(0));
       __ MovIntToFloat(i.OutputDoubleRegister(), kScratchReg);
@@ -2293,22 +2296,26 @@ CodeGenerator::CodeGenResult CodeGenerator::AssembleArchInstruction(
       __ srd(i.OutputRegister(), r0, ip);
       break;
     }
+#ifdef V8_TARGET_ARCH_PPC64
     case kPPC_I16x8ExtractLaneS: {
       __ mfvsrwz(kScratchReg, i.InputSimd128Register(0));
       __ sradi(i.OutputRegister(), kScratchReg, 16);
       break;
     }
+#endif
     case kPPC_I8x16ExtractLaneU: {
       __ mfvsrwz(r0, i.InputSimd128Register(0));
       __ li(ip, Operand(24));
       __ srd(i.OutputRegister(), r0, ip);
       break;
     }
+#ifdef V8_TARGET_ARCH_PPC64
     case kPPC_I8x16ExtractLaneS: {
       __ mfvsrwz(kScratchReg, i.InputSimd128Register(0));
       __ sradi(i.OutputRegister(), kScratchReg, 24);
       break;
     }
+#endif
     case kPPC_StoreCompressTagged: {
       ASSEMBLE_STORE_INTEGER(StoreTaggedField, StoreTaggedFieldX);
       break;
