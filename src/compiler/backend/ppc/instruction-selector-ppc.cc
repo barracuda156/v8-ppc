@@ -2168,12 +2168,20 @@ void InstructionSelector::VisitInt64AbsWithOverflow(Node* node) {
   UNREACHABLE();
 }
 
+#ifdef V8_TARGET_ARCH_PPC64
 #define SIMD_TYPES(V) \
   V(F64x2)            \
   V(F32x4)            \
   V(I32x4)            \
   V(I16x8)            \
   V(I8x16)
+#else
+#define SIMD_TYPES(V) \
+  V(F32x4)            \
+  V(I32x4)            \
+  V(I16x8)            \
+  V(I8x16)
+#endif
 
 #define SIMD_VISIT_SPLAT(Type)                               \
   void InstructionSelector::Visit##Type##Splat(Node* node) { \
@@ -2192,13 +2200,19 @@ SIMD_TYPES(SIMD_VISIT_SPLAT)
     Emit(kPPC_##Type##ExtractLane##Sign, g.DefineAsRegister(node),       \
          g.UseRegister(node->InputAt(0)), g.UseImmediate(lane));         \
   }
+#ifdef V8_TARGET_ARCH_PPC64
 SIMD_VISIT_EXTRACT_LANE(F64x2, )
+#endif
 SIMD_VISIT_EXTRACT_LANE(F32x4, )
 SIMD_VISIT_EXTRACT_LANE(I32x4, )
 SIMD_VISIT_EXTRACT_LANE(I16x8, U)
+#ifdef V8_TARGET_ARCH_PPC64
 SIMD_VISIT_EXTRACT_LANE(I16x8, S)
+#endif
 SIMD_VISIT_EXTRACT_LANE(I8x16, U)
+#ifdef V8_TARGET_ARCH_PPC64
 SIMD_VISIT_EXTRACT_LANE(I8x16, S)
+#endif
 #undef SIMD_VISIT_EXTRACT_LANE
 
 void InstructionSelector::VisitI32x4ReplaceLane(Node* node) { UNIMPLEMENTED(); }
