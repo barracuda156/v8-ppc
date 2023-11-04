@@ -430,8 +430,13 @@ class Code : public HeapObject {
 #elif V8_TARGET_ARCH_MIPS
   static constexpr int kHeaderPaddingSize = 16;
 #elif V8_TARGET_ARCH_PPC
+#if V8_OS_MACOSX
+  static constexpr int kHeaderPaddingSize =
+      FLAG_enable_embedded_constant_pool ? 12 : 0;
+#else
   static constexpr int kHeaderPaddingSize =
       FLAG_enable_embedded_constant_pool ? 16 : 0;
+#endif
 #elif V8_TARGET_ARCH_PPC64
   static constexpr int kHeaderPaddingSize =
       FLAG_enable_embedded_constant_pool ? (COMPRESS_POINTERS_BOOL ? 12 : 24)
