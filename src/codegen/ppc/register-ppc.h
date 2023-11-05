@@ -40,7 +40,8 @@ namespace internal {
 #endif
 
 #define ALLOCATABLE_GENERAL_REGISTERS(V)                  \
-   MAYBE_ALLOCATABLE_R13(V)
+  ALWAYS_ALLOCATABLE_GENERAL_REGISTERS(V)                 \
+  MAYBE_ALLOCATABLE_R13(V)
 
 #define LOW_DOUBLE_REGISTERS(V)                           \
   V(d0)  V(d1)  V(d2)  V(d3)  V(d4)  V(d5)  V(d6)  V(d7)  \
