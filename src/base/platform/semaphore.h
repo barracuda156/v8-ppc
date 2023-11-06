@@ -16,8 +16,7 @@
 #if MAC_OS_X_VERSION_MIN_REQUIRED > 1050 && !defined(__ppc__)
 #include <dispatch/dispatch.h>  // NOLINT
 #else
-// TODO: verify which semaphores fallback better to use, there are several implementations in macOS.
-#include <semaphore.h>  // NOLINT
+#include <mach/semaphore.h>  // NOLINT
 #endif
 #elif V8_OS_POSIX
 #include <semaphore.h>  // NOLINT
@@ -55,8 +54,12 @@ class V8_BASE_EXPORT Semaphore final {
   // the semaphore counter is decremented and true is returned.
   bool WaitFor(const TimeDelta& rel_time) V8_WARN_UNUSED_RESULT;
 
-#if V8_OS_MACOSX && (MAC_OS_X_VERSION_MIN_REQUIRED > 1050 && !defined(__ppc__))
+#if V8_OS_MACOSX
+#if MAC_OS_X_VERSION_MIN_REQUIRED > 1050 && !defined(__ppc__))
   using NativeHandle = dispatch_semaphore_t;
+#else
+  using NativeHandle = semaphore_t;
+#endif
 #elif V8_OS_POSIX
   using NativeHandle = sem_t;
 #elif V8_OS_WIN

@@ -9,8 +9,8 @@
 #if MAC_OS_X_VERSION_MIN_REQUIRED > 1050 && !defined(__ppc__)
 #include <dispatch/dispatch.h>
 #else
-// TODO: verify which semaphores fallback better to use, there are several implementations in macOS.
-#include <semaphore.h>
+#include <mach/mach_init.h>
+#include <mach/task.h>
 #endif
 #endif
 
@@ -23,7 +23,8 @@
 namespace v8 {
 namespace base {
 
-#if V8_OS_MACOSX && (MAC_OS_X_VERSION_MIN_REQUIRED > 1050 && !defined(__ppc__))
+#if V8_OS_MACOSX
+#if MAC_OS_X_VERSION_MIN_REQUIRED > 1050 && !defined(__ppc__)
 
 Semaphore::Semaphore(int count) {
   native_handle_ = dispatch_semaphore_create(count);
@@ -38,12 +39,62 @@ void Semaphore::Wait() {
   dispatch_semaphore_wait(native_handle_, DISPATCH_TIME_FOREVER);
 }
 
-
 bool Semaphore::WaitFor(const TimeDelta& rel_time) {
   dispatch_time_t timeout =
       dispatch_time(DISPATCH_TIME_NOW, rel_time.InNanoseconds());
   return dispatch_semaphore_wait(native_handle_, timeout) == 0;
 }
+
+#else // Fallback code for macOS with no libdispatch borrowed from nodejs12
+
+Semaphore::Semaphore(int count) {
+  kern_return_t result = semaphore_create(
+      mach_task_self(), &native_handle_, SYNC_POLICY_FIFO, count);
+  DCHECK_EQ(KERN_SUCCESS, result);
+  USE(result);
+}
+
+Semaphore::~Semaphore() {
+  kern_return_t result = semaphore_destroy(mach_task_self(), native_handle_);
+  DCHECK_EQ(KERN_SUCCESS, result);
+  USE(result);
+}
+
+void Semaphore::Signal() {
+  kern_return_t result = semaphore_signal(native_handle_);
+  DCHECK_EQ(KERN_SUCCESS, result);
+  USE(result);
+}
+
+void Semaphore::Wait() {
+  while (true) {
+    kern_return_t result = semaphore_wait(native_handle_);
+    if (result == KERN_SUCCESS) return;  // Semaphore was signalled.
+    DCHECK_EQ(KERN_ABORTED, result);
+  }
+}
+
+bool Semaphore::WaitFor(const TimeDelta& rel_time) {
+  TimeTicks now = TimeTicks::Now();
+  TimeTicks end = now + rel_time;
+  while (true) {
+    mach_timespec_t ts;
+    if (now >= end) {
+      // Return immediately if semaphore was not signalled.
+      ts.tv_sec = 0;
+      ts.tv_nsec = 0;
+    } else {
+      ts = (end - now).ToMachTimespec();
+    }
+    kern_return_t result = semaphore_timedwait(native_handle_, ts);
+    if (result == KERN_SUCCESS) return true;  // Semaphore was signalled.
+    if (result == KERN_OPERATION_TIMED_OUT) return false;  // Timeout.
+    DCHECK_EQ(KERN_ABORTED, result);
+    now = TimeTicks::Now();
+  }
+}
+
+#endif
 
 #elif V8_OS_POSIX
 
@@ -90,11 +141,7 @@ bool Semaphore::WaitFor(const TimeDelta& rel_time) {
 
   // Wait for semaphore signalled or timeout.
   while (true) {
-#if V8_OS_MACOSX
-    int result = sem_wait(&native_handle_); // This is a dirty hack to make it compile; it is not expected to work.
-#else
     int result = sem_timedwait(&native_handle_, &ts);
-#endif
     if (result == 0) return true;  // Semaphore was signalled.
 #if V8_LIBC_GLIBC && !V8_GLIBC_PREREQ(2, 4)
     if (result > 0) {
