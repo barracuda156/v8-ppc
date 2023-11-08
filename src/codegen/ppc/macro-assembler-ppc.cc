@@ -2367,7 +2367,7 @@ void MacroAssembler::Xor(Register ra, Register rs, const Operand& rb,
 
 void MacroAssembler::CmpSmiLiteral(Register src1, Smi smi, Register scratch,
                                    CRegister cr) {
-#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH)
+#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH) || defined(V8_TARGET_ARCH_PPC)
   Cmpi(src1, Operand(smi), scratch, cr);
 #else
   LoadSmiLiteral(scratch, smi);
@@ -2377,7 +2377,7 @@ void MacroAssembler::CmpSmiLiteral(Register src1, Smi smi, Register scratch,
 
 void MacroAssembler::CmplSmiLiteral(Register src1, Smi smi, Register scratch,
                                     CRegister cr) {
-#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH)
+#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH) || defined(V8_TARGET_ARCH_PPC)
   Cmpli(src1, Operand(smi), scratch, cr);
 #else
   LoadSmiLiteral(scratch, smi);
@@ -2387,7 +2387,7 @@ void MacroAssembler::CmplSmiLiteral(Register src1, Smi smi, Register scratch,
 
 void MacroAssembler::AddSmiLiteral(Register dst, Register src, Smi smi,
                                    Register scratch) {
-#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH)
+#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH) || defined(V8_TARGET_ARCH_PPC)
   Add(dst, src, static_cast<intptr_t>(smi.ptr()), scratch);
 #else
   LoadSmiLiteral(scratch, smi);
@@ -2397,7 +2397,7 @@ void MacroAssembler::AddSmiLiteral(Register dst, Register src, Smi smi,
 
 void MacroAssembler::SubSmiLiteral(Register dst, Register src, Smi smi,
                                    Register scratch) {
-#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH)
+#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH) || defined(V8_TARGET_ARCH_PPC)
   Add(dst, src, -(static_cast<intptr_t>(smi.ptr())), scratch);
 #else
   LoadSmiLiteral(scratch, smi);
@@ -2407,7 +2407,7 @@ void MacroAssembler::SubSmiLiteral(Register dst, Register src, Smi smi,
 
 void MacroAssembler::AndSmiLiteral(Register dst, Register src, Smi smi,
                                    Register scratch, RCBit rc) {
-#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH)
+#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH) || defined(V8_TARGET_ARCH_PPC)
   And(dst, src, Operand(smi), rc);
 #else
   LoadSmiLiteral(scratch, smi);
@@ -2916,7 +2916,8 @@ void TurboAssembler::LoadEntryFromBuiltinIndex(Register builtin_index) {
 
   // The builtin_index register contains the builtin index as a Smi.
   // Untagging is folded into the indexing operand below.
-#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH)
+  // TODO: verify this specifically.
+#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH) || defined(V8_TARGET_ARCH_PPC)
   ShiftLeftImm(builtin_index, builtin_index,
                Operand(kSystemPointerSizeLog2 - kSmiShift));
 #else
