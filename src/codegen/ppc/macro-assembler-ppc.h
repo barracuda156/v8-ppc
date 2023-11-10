@@ -891,8 +891,9 @@ class V8_EXPORT_PRIVATE MacroAssembler : public TurboAssembler {
     ShiftLeftImm(dst, src, Operand(kSmiShift), rc);
   }
 
+#if !defined(V8_TARGET_ARCH_PPC)
   void SmiToPtrArrayOffset(Register dst, Register src) {
-#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH) || (V8_OS_MACOSX && V8_TARGET_ARCH_PPC)
+#if defined(V8_COMPRESS_POINTERS) || defined(V8_31BIT_SMIS_ON_64BIT_ARCH)
     STATIC_ASSERT(kSmiTag == 0 && kSmiShift < kPointerSizeLog2);
     ShiftLeftImm(dst, src, Operand(kPointerSizeLog2 - kSmiShift));
 #else
@@ -900,6 +901,7 @@ class V8_EXPORT_PRIVATE MacroAssembler : public TurboAssembler {
     ShiftRightArithImm(dst, src, kSmiShift - kPointerSizeLog2);
 #endif
   }
+#endif
 
   // Jump if either of the registers contain a non-smi.
   inline void JumpIfNotSmi(Register value, Label* not_smi_label) {
@@ -911,7 +913,7 @@ class V8_EXPORT_PRIVATE MacroAssembler : public TurboAssembler {
   void AssertNotSmi(Register object);
   void AssertSmi(Register object);
 
-#if !defined(V8_COMPRESS_POINTERS) && !defined(V8_31BIT_SMIS_ON_64BIT_ARCH) && !(V8_OS_MACOSX && V8_TARGET_ARCH_PPC)
+#if !defined(V8_COMPRESS_POINTERS) && !defined(V8_31BIT_SMIS_ON_64BIT_ARCH) && !defined(V8_TARGET_ARCH_PPC)
   // Ensure it is permissible to read/write int value directly from
   // upper half of the smi.
   STATIC_ASSERT(kSmiTag == 0);
