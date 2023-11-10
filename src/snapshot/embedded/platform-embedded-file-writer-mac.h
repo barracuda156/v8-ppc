@@ -47,6 +47,11 @@ class PlatformEmbeddedFileWriterMac : public PlatformEmbeddedFileWriterBase {
 
   int IndentedDataDirective(DataDirective directive) override;
 
+#ifdef __POWERPC__
+  DataDirective ByteChunkDataDirective() const override;
+  int WriteByteChunk(const uint8_t* data) override;
+#endif
+
  private:
   void DeclareSymbolGlobal(const char* name);
 
